@@ -8,7 +8,7 @@ const path = require('path');
 var config = {
 
     
-  entry: './src/app.js',
+  entry: ['babel-polyfill','./src/app.js'],
   mode : "development",
 
   output: {
