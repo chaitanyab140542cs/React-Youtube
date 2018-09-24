@@ -40,3 +40,15 @@ p{
     pointer-events: none;
     color: #aaa;
 }
+
+.commentStyles{
+    font-family: Tahoma, Geneva, sans-serif
+}
+
+
+.divStyles{
+    background-color: #B3D3EB;
+    padding : 5px 0px 5px 0px;
+    border-radius : 5px;
+    margin : 5px 0px 5px 0px;
+}

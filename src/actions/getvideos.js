@@ -1,9 +1,16 @@
-import { put, takeEvery,call, actionChannel,all } from 'redux-saga/effects'
+import { put, takeEvery,call,all } from 'redux-saga/effects'
 
 export const likeButton = (value) => {
     return {type : 'LIKE_BUTTON',
     value : value
     }
+}
+
+export const displayComments = (value) => {
+  return {
+    type : 'DISPLAY_COMMENTS',
+    value : value
+  }
 }
 
 const requestedLikeStored = (value) => {
@@ -42,12 +49,26 @@ export const getVideos = (value) => {
     value : value
  }
 };
+
+export const displayCommentsCompleted = (data,videoId) => {
+  return{
+    type : 'DISPLAY_COMMENTS_COMPLETED',
+    value : {
+      videoId : videoId,
+      value : data
+    }
+    
+
+
+  }
+}
   
 
   export default function* watchgetVideos() {
       
     yield all([takeEvery('GET_VIDEOS', getVideoAsync),
-    takeEvery('LIKE_BUTTON',postLikeAsync)]);
+    takeEvery('LIKE_BUTTON',postLikeAsync),
+    takeEvery('DISPLAY_COMMENTS',getCommentsAsync)]);
   }
 
 
@@ -79,7 +100,7 @@ export const getVideos = (value) => {
 
 
   function* postLikeAsync(value){
-      console.log(value);
+     
       yield call(() => {
         fetch('http://localhost:3000/postdata', {
        
@@ -98,6 +119,18 @@ export const getVideos = (value) => {
       });
       yield put(requestedLikeStored(value.value));
   }
+
+  function* getCommentsAsync(value){
+     
+    const data = yield call(() => {
+      return fetch(`https://www.googleapis.com/youtube/v3/commentThreads?key=AIzaSyCkYcigfb2fx-6bfH-LTJyB3oaMeh8LBSQ&maxResults=5&textFormat=plainText&part=snippet&videoId=${value.value}`)
+      .then((response) => response.json())
+      .then((result) => {return result.items}) 
+  }
+); 
+    
+   yield put(displayCommentsCompleted(data,value.value));
+}
 
   
   

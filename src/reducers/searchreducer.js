@@ -3,7 +3,9 @@ const initialState = {
   finalYoutube:[],
   loading : false,
   error : false,
-  videoLikesData : []
+  videoLikesData : [],
+  disableButton : false,
+  displayComments : []
 };
 
  const searchReducer  = (state=initialState, action) => {
@@ -37,11 +39,32 @@ const initialState = {
           error: true
         };
         case 'RETRIEVE_LIKED_VIDEOS':
-        console.log(action.data);
+       
         return {
           ...state,
           videoLikesData : action.data
         };
+
+        case 'REQUESTED_LIKE_STORED':
+       
+        return {
+          ...state,
+          disableButton : true
+        };
+
+        case 'DISPLAY_COMMENTS_COMPLETED' :
+        console.log(action.value);
+        return {
+          ...state,
+          displayComments : {
+            ...state.displayComments,
+             
+                [action.value.videoId] : action.value.value
+             }
+          
+        };
+
+  
         
       default:
         return state;
