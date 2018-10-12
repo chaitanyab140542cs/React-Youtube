@@ -1,11 +1,13 @@
 const initialState = {
-  value : 'cr7',
+  value : '',
   finalYoutube:[],
   loading : false,
   error : false,
   videoLikesData : [],
   disableButton : false,
-  displayComments : []
+  displayComments : [],
+  databaseComments : [],
+  isAuthenticated : null,
 };
 
  const searchReducer  = (state=initialState, action) => {
@@ -15,6 +17,25 @@ const initialState = {
         return {
           ...state,
           value : action.value
+        };
+        case 'REQUEST_LOGIN_SUCCESS':
+        
+        return {
+          ...state,
+         isAuthenticated : action.value
+        };
+        case 'JWT_SIGNOUT':
+        
+        return {
+          ...state,
+         isAuthenticated :  false
+        };
+
+
+        case 'REQUEST_LOGIN_FAILURE':
+        return {
+          ...state,
+         isAuthenticated : action.value
         };
 
         case 'REQUESTED_VIDEO':
@@ -53,17 +74,22 @@ const initialState = {
         };
 
         case 'DISPLAY_COMMENTS_COMPLETED' :
-        console.log(action.value);
+        console.log(action.value.databaseComments);
         return {
           ...state,
           displayComments : {
             ...state.displayComments,
              
                 [action.value.videoId] : action.value.value
-             }
+             },
+           databaseComments : {
+             ...state.databaseComments,
+            [action.value.videoId] : action.value.databaseComments
+           }  
           
         };
 
+       
   
         
       default:

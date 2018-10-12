@@ -1,5 +1,6 @@
 import { put, takeEvery,call,all } from 'redux-saga/effects'
-
+import {delay } from 'redux-saga';
+const token = localStorage.getItem('id_token');
 export const likeButton = (value) => {
     return {type : 'LIKE_BUTTON',
     value : value
@@ -28,6 +29,15 @@ const retrieveLikedVideos = (data)  => {
         data : data
     }
 } 
+
+export const storeComments = (comment,videoId) => {
+  
+  return{
+      type : 'STORE_COMMENTS',
+      comment : comment,
+      videoId : videoId
+  }
+}
     
 
 const requestVideo = () => {
@@ -50,25 +60,92 @@ export const getVideos = (value) => {
  }
 };
 
-export const displayCommentsCompleted = (data,videoId) => {
+export const submitLoginForm = (value) => {
+  return {
+    type : 'SUBMIT_LOGIN_FORM',
+    value : value
+  }
+}
+
+export const displayCommentsCompleted = (data,databaseComments,videoId) => {
+  
   return{
     type : 'DISPLAY_COMMENTS_COMPLETED',
     value : {
       videoId : videoId,
-      value : data
+      value : data,
+      databaseComments : databaseComments
     }
     
 
 
   }
 }
+
+export const jwtSignout = () => {
+  localStorage.removeItem('id_token');
+  return {
+    type : 'JWT_SIGNOUT',
+  }
+}
+
+
+export const requestLoginFailed = (data) => {
+  return{
+    type : 'REQUEST_LOGIN_FAILED',
+    value : data.success
+  }
+}
+
+export const requestLoginSuccess = (data) => {
+  console.log(data);
+  return{
+    type : 'REQUEST_LOGIN_SUCCESS',
+    value : data.success
+  }
+}
   
 
   export default function* watchgetVideos() {
       
-    yield all([takeEvery('GET_VIDEOS', getVideoAsync),
+    yield all([takeEvery('GET_VIDEOS',getVideoAsync),
     takeEvery('LIKE_BUTTON',postLikeAsync),
-    takeEvery('DISPLAY_COMMENTS',getCommentsAsync)]);
+    takeEvery('DISPLAY_COMMENTS',getCommentsAsync),
+    takeEvery('SUBMIT_LOGIN_FORM',submitLoginFormAsync),
+    takeEvery('STORE_COMMENTS',postCommentsAsync)]);
+  }
+
+
+  function* submitLoginFormAsync(value){
+    
+     
+       const data = yield call(() => {
+       return fetch('http://localhost:3000/authenticate', {
+       
+          method: 'post',
+          headers : {
+              'Accept' : 'application/json',
+              'Content-Type' : 'application/json' 
+          },
+          body:JSON.stringify( {
+            user : value.value.username.value,
+            password : value.value.password.value
+          })
+      }).then((response) => response.json())
+      .then((responseJSON) => {
+        console.log(responseJSON);
+        return responseJSON;
+      })
+           
+      });
+      if(data.success){
+        console.log(data.token);
+        localStorage.setItem('id_token',data.token);
+          yield put(requestLoginSuccess(data));
+      }
+     else 
+         yield put(requestLoginFailed(data));
+    
   }
 
 
@@ -81,15 +158,22 @@ export const displayCommentsCompleted = (data,videoId) => {
            .then((response) => response.json())
            .then((result) => {return result.items}) 
        }
-    ); 
+         ); 
       yield put(requestVideoSuccess(data));
     } catch (error) {
       yield put(requestVideoError());
     }
-
+    
     const data = yield call(() => {
-        return  fetch(`http://localhost:3000/users`)
+      console.log(token);
+        return  fetch(`http://localhost:3000/users`,{
+          
+          headers : {
+            'x-access-token' : token
+          }
+        })
         .then(res => {
+            
             return res.json();
          })
     });
@@ -102,7 +186,7 @@ export const displayCommentsCompleted = (data,videoId) => {
   function* postLikeAsync(value){
      
       yield call(() => {
-        fetch('http://localhost:3000/postdata', {
+        fetch('http://localhost:3000/postlikes', {
        
             method: 'post',
             headers : {
@@ -111,6 +195,7 @@ export const displayCommentsCompleted = (data,videoId) => {
             },
             body:JSON.stringify( {
               id : value.value,
+              token : token
             })
         }).then(function(response) {
         }).catch(function(error) {
@@ -128,9 +213,49 @@ export const displayCommentsCompleted = (data,videoId) => {
       .then((result) => {return result.items}) 
   }
 ); 
+const databaseComments = yield call(() => {
+  return  fetch(`http://localhost:3000/comments?id=${value.value}`,{
+    headers : {
+          'x-access-token' : token
+    }
+  })
+  .then(res => {
+      return res.json();
+   })
+});
+console.log(databaseComments);
+
     
-   yield put(displayCommentsCompleted(data,value.value));
+   yield put(displayCommentsCompleted(data,databaseComments,value.value));
 }
+
+
+function* postCommentsAsync(data){
+  
+  yield call(() => {
+    fetch('http://localhost:3000/comments', {
+   
+        method: 'post',
+        headers : {
+            'Accept' : 'application/json',
+            'Content-Type' : 'application/json' 
+        },
+        body:JSON.stringify( {
+          comment : data.comment,
+          videoId : data.videoId,
+          token : token
+        })
+    }).then(function(response) {
+    }).catch(function(error) {
+      console.log('Request failed', error)
+    });   
+  });
+ 
+
+}
+
+
+
 
   
   

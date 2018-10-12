@@ -52,3 +52,24 @@ p{
     border-radius : 5px;
     margin : 5px 0px 5px 0px;
 }
+
+
+.shadow-textarea textarea.form-control::placeholder {
+    font-weight: 300;
+}
+.shadow-textarea textarea.form-control {
+    padding-left: 0.8rem;
+}
+
+.videoDiv{
+    border-radius : 20px;
+    border-width : 10px;
+    border-color : #B3D3EB;
+}
+
+
+.likeDiv{
+    display: flex;
+  align-items: center;
+  justify-content: center;
+}

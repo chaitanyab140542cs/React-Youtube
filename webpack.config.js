@@ -44,6 +44,10 @@ publicPath : "/dist",
 
 watch : true,
 
+devServer: {
+  historyApiFallback: true,
+}
+
 };
 
 module.exports = config;
