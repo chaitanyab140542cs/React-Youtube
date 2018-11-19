@@ -13,13 +13,11 @@ import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import {LoginForm}  from './login';
 import {submitLoginForm} from '../actions/getvideos';
 import {jwtSignout} from '../actions/getvideos';
-const key ='AIzaSyCkYcigfb2fx-6bfH-LTJyB3oaMeh8LBSQ';
+import { config } from '../firebase/config';
 
 
-firebase.initializeApp({
-    apiKey : "AIzaSyAsjCpvFXSqOI_fCXjpUap1df8kNYfAZv4",
-    authDomain : "react--216210.firebaseapp.com"
-})
+
+firebase.initializeApp(config);
 
  class YoutubeRedux extends Component {
     constructor(props)

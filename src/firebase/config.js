@@ -1,7 +1,4 @@
-import firebase from 'firebase';
-
-
-var config = {
+ export const config = {
     apiKey: "AIzaSyAsjCpvFXSqOI_fCXjpUap1df8kNYfAZv4",
     authDomain: "react--216210.firebaseapp.com",
     databaseURL: "https://react--216210.firebaseio.com",
@@ -9,4 +6,4 @@ var config = {
     storageBucket: "react-youtube-216210.appspot.com",
     messagingSenderId: "792276520067"
   };
-  firebase.initializeApp(config);
+ 

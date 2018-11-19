@@ -1,6 +1,8 @@
 import { put, takeEvery,call,all } from 'redux-saga/effects'
 import {delay } from 'redux-saga';
-const token = localStorage.getItem('id_token');
+import firebase from 'firebase';
+import {config} from '../firebase/config';
+
 export const likeButton = (value) => {
     return {type : 'LIKE_BUTTON',
     value : value
@@ -19,6 +21,19 @@ const requestedLikeStored = (value) => {
         type : 'REQUESTED_LIKE_STORED',
         value : value
     }
+}
+
+const likesInFirestore = (value) => {
+  const db = firebase.firestore();
+  db.settings({timestampsInSnapshots : true});
+  db.collection('video_likes').add({
+      id : value,
+      no_of_likes : 1
+  })
+  return {
+    type : 'LIKES_IN_FIRESTORE',
+    value : value
+  }
 }
 
 const retrieveLikedVideos = (data)  => {
@@ -84,6 +99,7 @@ export const displayCommentsCompleted = (data,databaseComments,videoId) => {
 
 export const jwtSignout = () => {
   localStorage.removeItem('id_token');
+  console.log(localStorage);
   return {
     type : 'JWT_SIGNOUT',
   }
@@ -141,13 +157,14 @@ export const requestLoginSuccess = (data) => {
       if(data.success){
         console.log(data.token);
         localStorage.setItem('id_token',data.token);
+        console.log(localStorage);
           yield put(requestLoginSuccess(data));
       }
      else 
          yield put(requestLoginFailed(data));
     
   }
-
+      
 
   function* getVideoAsync(value) {
   
@@ -165,13 +182,13 @@ export const requestLoginSuccess = (data) => {
     }
     
     const data = yield call(() => {
-      console.log(token);
+      console.log(localStorage.getItem('id_token'));
         return  fetch(`http://localhost:3000/users`,{
           
           headers : {
-            'x-access-token' : token
+            'x-access-token' : localStorage.getItem('id_token')
           }
-        })
+        })      
         .then(res => {
             
             return res.json();
@@ -195,7 +212,7 @@ export const requestLoginSuccess = (data) => {
             },
             body:JSON.stringify( {
               id : value.value,
-              token : token
+              token :  localStorage.getItem('id_token')
             })
         }).then(function(response) {
         }).catch(function(error) {
@@ -203,10 +220,10 @@ export const requestLoginSuccess = (data) => {
         });   
       });
       yield put(requestedLikeStored(value.value));
+      yield put(likesInFirestore(value.value));
   }
 
-  function* getCommentsAsync(value){
-     
+  function* getCommentsAsync(value){ 
     const data = yield call(() => {
       return fetch(`https://www.googleapis.com/youtube/v3/commentThreads?key=AIzaSyCkYcigfb2fx-6bfH-LTJyB3oaMeh8LBSQ&maxResults=5&textFormat=plainText&part=snippet&videoId=${value.value}`)
       .then((response) => response.json())
@@ -216,14 +233,14 @@ export const requestLoginSuccess = (data) => {
 const databaseComments = yield call(() => {
   return  fetch(`http://localhost:3000/comments?id=${value.value}`,{
     headers : {
-          'x-access-token' : token
+          'x-access-token' :  localStorage.getItem('id_token')
     }
   })
   .then(res => {
       return res.json();
    })
 });
-console.log(databaseComments);
+
 
     
    yield put(displayCommentsCompleted(data,databaseComments,value.value));
@@ -243,7 +260,7 @@ function* postCommentsAsync(data){
         body:JSON.stringify( {
           comment : data.comment,
           videoId : data.videoId,
-          token : token
+          token :  localStorage.getItem('id_token')
         })
     }).then(function(response) {
     }).catch(function(error) {

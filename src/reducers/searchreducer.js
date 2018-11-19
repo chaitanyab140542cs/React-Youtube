@@ -73,6 +73,12 @@ const initialState = {
           disableButton : true
         };
 
+        case 'LIKES_IN_FIRESTORE':
+
+        return {
+          ...state
+        }
+
         case 'DISPLAY_COMMENTS_COMPLETED' :
         console.log(action.value.databaseComments);
         return {

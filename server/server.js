@@ -23,7 +23,7 @@ app.use(cors());
 app.use('/authenticate',authenticate);
 app.use(function(req, res, next) {
       
-    console.log(req.headers['x-access-token']);
+   
     // check header or url parameters or post parameters for token  
     var token = req.body.token || req.query.token || req.headers['x-access-token'];  
     
@@ -37,7 +37,10 @@ app.use(function(req, res, next) {
                     message: 'Failed to authenticate token.'  
                 });  
             } else {  
-                // if everything is good, save to request for use in other routes  
+                // if everything is good, save to request for use in other routes 
+                 
+                console.log(token);
+                console.log('token has matched');
                 req.decoded = decoded;  
                 next();  
             }  
